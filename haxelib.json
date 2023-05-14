@@ -1,0 +1,14 @@
+{
+    "name": "om.args",
+    "version": "0.0.0",
+    "description": "Argument parsing",
+    "tags": ["om","args"],
+    "url": "https://github.com/omlib/om.args",
+    "license": "Public",
+    "contributors": ["tong"],
+    "releasenote": "See CHANGELOG",
+    "classPath" : "src/",
+    "dependencies": {
+
+    }
+}
