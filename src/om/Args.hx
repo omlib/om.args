@@ -1,4 +1,4 @@
-package om.args;
+package om;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -6,13 +6,14 @@ import haxe.macro.Expr;
 using haxe.macro.Tools;
 using StringTools;
 
-typedef ArgHandler = {
+typedef Handler = {
 	function getDoc():String;
 	function parse(args:Array<Dynamic>):Void;
 }
 
 class Args {
-	macro static public function generate(definition:Expr, ?interactive:Bool = false) : ExprOf<ArgHandler> {
+
+	macro static public function generate(definition:Expr, ?interactive:Bool = false) : ExprOf<Handler> {
 		var p = Context.currentPos();
 		var el = switch(definition.expr) {
 			case EArrayDecl(el): el;
