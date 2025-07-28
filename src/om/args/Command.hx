@@ -1,15 +1,15 @@
-package om;
+package om.args;
 
 using StringTools;
 
-enum EArgType {
+enum EValueType {
 	bool;
 	float;
 	int;
 	string;
 }
 
-abstract ArgType(EArgType) from EArgType to EArgType {
+abstract ValueType(EValueType) from EValueType to EValueType {
 	public function hint():String {
 		return switch this {
 			case bool:
@@ -24,17 +24,45 @@ abstract ArgType(EArgType) from EArgType to EArgType {
 	}
 }
 
+/*
+	abstract Value(String) from String to String {
+	public inline function new(v)
+		this = v;
+
+	@:to public function toBool():Bool
+		return switch this {
+			case "true", "", null: true;
+			case "false": false;
+			case _: false;
+		}
+
+	@:to public inline function toFloat():Float
+		return Std.parseFloat(this);
+
+	@:to public inline function toInt():Int
+		return Std.parseInt(this);
+
+	@:from public static inline function fromBool(v:Bool)
+		return new Value(Std.string(v));
+
+	@:from public static inline function fromFloat(f:Float)
+		return new Value(Std.string(f));
+
+	@:from public static inline function fromInt(i:Int)
+		return new Value(Std.string(i));
+	}
+ */
 @:structInit
-class Def {
+class Arg {
 	public var name:String;
 	public var shortName:String;
-	public var type:ArgType;
+	public var type:ValueType;
 	public var description:String;
 	public var required:Bool;
 	public var defaultValue:String;
 	public var multiple:Bool;
 
-	public function new(name:String, ?shortName:String, ?type:ArgType, ?description:String, required = false, ?defaultValue:String, multiple = false) {
+	public function new(name:String, ?shortName:String, ?type:ValueType, ?description:String, required = false, ?defaultValue:String, multiple = false) {
 		this.name = name;
 		this.shortName = shortName;
 		this.type = type ?? string;
@@ -64,11 +92,11 @@ class Def {
 class Command {
 	public final name:String;
 	public final description:String;
-	public final defs:Array<Def>;
+	public final defs:Array<Arg>;
 	public final sub:Map<String, Command> = [];
 	public final values:Map<String, Array<String>> = [];
 
-	public function new(name:String, ?description:String, ?defs:Array<Def>, ?sub:Array<Command>) {
+	public function new(name:String, ?description:String, ?defs:Array<Arg>, ?sub:Array<Command>) {
 		this.name = name;
 		this.description = description;
 		this.defs = defs ?? [];
@@ -100,7 +128,7 @@ class Command {
 	}
 
 	public function parse(args:Array<String>) {
-		final defMap = new Map<String, Def>();
+		final defMap = new Map<String, Arg>();
 		for (def in defs) {
 			defMap.set(def.name, def);
 			if (def.shortName != null)
@@ -153,7 +181,7 @@ class Command {
 	public inline function getFloat(name:String):Null<Float>
 		return Std.parseFloat(get(name));
 
-	public inline function getBool(name:String):Bool
+	public inline function getBool(name:String):Null<Bool>
 		return get(name) == "true";
 
 	public function help(indent = "  "):String {
@@ -204,7 +232,7 @@ class Command {
 		return lines.join('\n');
 	}
 
-	function parseValue(args:Array<String>, i:Int, inlineValue:Null<String>, def:Def):{values:Array<String>, advance:Int} {
+	function parseValue(args:Array<String>, i:Int, inlineValue:Null<String>, def:Arg):{values:Array<String>, advance:Int} {
 		var collected:Array<String> = [];
 		var advance = 1;
 		if (inlineValue != null) {
